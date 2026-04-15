@@ -19,12 +19,16 @@
 
   // ── Attempt login (on window so inline onclick can reach it) ─────────
   window._apexAttemptLogin = function () {
-    const user     = (document.getElementById('apex-login-user')?.value || '').trim();
+    const rawUser  = (document.getElementById('apex-login-user')?.value || '').trim();
     const pass     = document.getElementById('apex-login-pass')?.value || '';
     const remember = document.getElementById('apex-login-remember')?.checked || false;
     const errEl    = document.getElementById('apex-login-err');
 
-    if (ACCOUNTS[user] && ACCOUNTS[user] === pass) {
+    // Match username case-insensitively, then resolve to canonical casing
+    const matchedKey = Object.keys(ACCOUNTS).find(k => k.toLowerCase() === rawUser.toLowerCase());
+    const user = matchedKey || rawUser;
+
+    if (matchedKey && ACCOUNTS[matchedKey] === pass) {
       // Always write to sessionStorage (tab session)
       sessionStorage.setItem(SESSION_KEY, user);
 

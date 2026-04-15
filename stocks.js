@@ -573,15 +573,7 @@ function _unsubscribeStock(sym){
 let _quoteAbort = null;
 const _QUOTE_BATCH = 10;   // Finnhub is per-symbol, so batch = parallel burst
 
-function _updateStockRow(sym) {
-  const el  = document.getElementById('stockPairList'); if (!el) return;
-  const row = el.querySelector('[data-stock-sym="' + sym + '"]'); if (!row) return;
-  const pair = STOCK_PAIRS.find(p => p.sym === sym); if (!pair) return;
-  const pr = prices[sym] || 0, ch = pair.ch || 0, cls = ch >= 0 ? 'up' : 'dn';
-  const pe = row.querySelector('.p-price'), ce = row.querySelector('.p-chg');
-  if (pe) { pe.textContent = '$' + (pr > 0 ? fp(pr) : '--'); pe.className = 'p-price ' + cls; }
-  if (ce) { ce.textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '%'; ce.className = 'p-chg ' + cls; }
-}
+// _updateStockRow removed — stock list rows no longer display live prices.
 
 async function _fetchFinnhubQuote(pair, signal) {
   // Only fetch US stocks (no exchange prefix) — Finnhub free tier doesn't cover European exchanges
@@ -861,7 +853,7 @@ function selStock(sym){
   _subscribeStock(sym);
 }
 
-// renderStockPairs
+// renderStockPairs — shows badge, symbol, name, and favorite star only (no live prices)
 function renderStockPairs(filter=''){
   const el=document.getElementById('stockPairList'); if(!el) return;
   const q=(filter||'').toLowerCase();
@@ -873,40 +865,25 @@ function renderStockPairs(filter=''){
   Object.entries(sectors).forEach(([sector,pairs])=>{
     html+=`<div class="sb-section-lbl">${sector}</div>`;
     pairs.forEach(p=>{
-      const pr=prices[p.sym]||p.p||0, ch=p.ch||0, cls=ch>=0?'up':'dn';
       const disp=_dispSym(p.sym);
       const lbl=disp.length>5?disp.slice(0,5):disp;
-      html+=`<div class="pi ${p.sym===S.pair&&stockMode?'on':''}" data-stock-sym="${p.sym}" onclick="selStock('${p.sym}')">
+      const isFav=typeof favorites!=='undefined'&&favorites.includes(p.sym);
+      html+=`<div class="pi ${p.sym===S.pair&&stockMode?'on':''}" data-stock-sym="${p.sym}" onclick="selStock('${p.sym}')" style="justify-content:space-between">
         <div class="ci">
           <div class="stock-badge" style="${_stockBadgeStyle(p.sym)}">${lbl}</div>
           <div style="min-width:0">
             <div class="p-base">${disp}</div>
-            <div class="p-quote" style="max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px">${p.name}</div>
+            <div class="p-quote" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px">${p.name}</div>
           </div>
         </div>
-        <div class="p-right">
-          <div class="p-nums">
-            <div class="p-price ${cls}">$${pr>0?fp(pr):'--'}</div>
-            <div class="p-chg ${cls}">${ch>=0?'+':''}${ch.toFixed(2)}%</div>
-          </div>
-        </div>
+        <span class="fav-star${isFav?' active':''}" data-sym="${p.sym}" onclick="event.stopPropagation();toggleFav('${p.sym}')" style="font-size:14px;cursor:pointer;padding:0 4px;color:${isFav?'#f59e0b':'var(--t3)'}" title="${isFav?'Remove favourite':'Add favourite'}">★</span>
       </div>`;
     });
   });
   el.innerHTML=html;
 }
 
-function _updateStockPricesOnly(){
-  const el=document.getElementById('stockPairList');
-  if(!el||el.style.display==='none') return;
-  STOCK_PAIRS.forEach(p=>{
-    const row=el.querySelector(`[data-stock-sym="${p.sym}"]`); if(!row) return;
-    const pr=prices[p.sym]||p.p||0, ch=p.ch||0, cls=ch>=0?'up':'dn';
-    const pe=row.querySelector('.p-price'), ce=row.querySelector('.p-chg');
-    if(pe){pe.textContent='$'+(pr>0?fp(pr):'--');pe.className='p-price '+cls;}
-    if(ce){ce.textContent=(ch>=0?'+':'')+ch.toFixed(2)+'%';ce.className='p-chg '+cls;}
-  });
-}
+// _updateStockPricesOnly removed — stock list no longer shows live prices.
 
 function switchToStocks(){
   stockMode=true; updateMarketStatusBadge(); startStockFeed();
@@ -930,4 +907,5 @@ window.genCandles=function(){
   else if(typeof _stockOrigGenCandles==='function') _stockOrigGenCandles();
 };
 
-setInterval(()=>{if(stockMode&&_quotesLoaded) loadStockQuotes();},30000);
+// Quotes are loaded on-demand when the Stocks tab is opened (via switchToStocks → loadStockQuotes).
+// No auto-load on startup and no periodic background refresh.

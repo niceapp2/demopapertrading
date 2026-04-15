@@ -295,9 +295,6 @@ function loop() {
   updatePriceLine();
   if (tick % 4  === 0) {
     _updatePairPricesOnly();
-    if (typeof stockMode !== 'undefined' && stockMode && typeof _updateStockPricesOnly === 'function') {
-      _updateStockPricesOnly();
-    }
   }
   if (tick % 10 === 0) renderPos();
   if (tick % 20 === 0) renderBook();
