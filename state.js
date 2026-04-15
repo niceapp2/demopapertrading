@@ -124,3 +124,31 @@ async function loadAllPairs() {
     console.warn('loadAllPairs failed', e);
   }
 }
+
+// ── LAZY PAIR LOADER ──────────────────────────────────────────────────
+// Call loadAllPairsLazy() from switchToCryptoTab() instead of loadAllPairs().
+// Fetches only on the first invocation; subsequent calls are silent no-ops.
+let _pairsLoaded = false;
+async function loadAllPairsLazy() {
+  if (_pairsLoaded) return;
+  _pairsLoaded = true;   // set early to prevent a double-fetch on rapid clicks
+
+  // Spinning toast while the request is in-flight
+  const toastId = '_pairsLoadingToast';
+  const stack = document.getElementById('tstack');
+  if (stack) {
+    const t = document.createElement('div');
+    t.id = toastId;
+    t.className = 'toast';
+    t.style.cssText = 'background:rgba(30,30,46,.96);border:1px solid rgba(167,139,250,.3);color:#a78bfa;display:flex;align-items:center;gap:8px;pointer-events:none';
+    t.innerHTML = '<span style="animation:spin 1s linear infinite;display:inline-block">⟳</span> Loading pairs\u2026';
+    stack.appendChild(t);
+  }
+
+  try {
+    await loadAllPairs();
+  } finally {
+    const t = document.getElementById(toastId);
+    if (t) t.remove();
+  }
+}

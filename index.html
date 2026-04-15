@@ -62,7 +62,7 @@
 
       <!-- Market-mode switcher: Crypto / Stocks -->
       <div class="market-switcher">
-        <button class="msw-btn on" id="msw-crypto" onclick="switchToCryptoTab()">
+        <button class="msw-btn on" id="msw-crypto" onclick="switchToCryptoTab();loadAllPairsLazy()">
           <span class="msw-ico">₿</span> Crypto
         </button>
         <button class="msw-btn" id="msw-stocks" onclick="switchToStocksTab()">
@@ -298,6 +298,13 @@
   window.addEventListener('resize',init);init();draw();
 })();
 
+// ── SPIN KEYFRAME (used by lazy-load toast in state.js) ───────────────
+(function(){
+  const s = document.createElement('style');
+  s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(s);
+})();
+
 // ── BOOTSTRAP ─────────────────────────────────────────────────────────
 _injectPanels();           // panels.js — insert floating panel HTML
 loadSettings();            // settings.js — restore persisted prefs
@@ -309,7 +316,7 @@ selPair(S.pair);           // triggers chart + kline load
 renderPos();
 renderHist();
 startFeed();               // feed.js — open WebSocket
-loadAllPairs();            // state.js — fetch full Binance pair list
+// loadAllPairs() is now called lazily when the user first clicks the Crypto tab
 
 setInterval(updateCandleTimer, 1000);
 updateCandleTimer();

@@ -49,12 +49,7 @@
       _setLoggedInUI(user, remember);
       
       // ── LOAD AND RENDER TRADES AFTER LOGIN ──────────────────────────
-      if (typeof loadSettings === 'function') {
-        loadSettings();
-      }
-      if (typeof _renderRestoredTrades === 'function') {
-        _renderRestoredTrades();
-      }
+      _loadUserData();
       // ────────────────────────────────────────────────────────────────
       
     } else {
@@ -248,6 +243,16 @@
     }, 80);
   }
 
+  // ── Load settings and render trades after authentication ────────────
+  function _loadUserData() {
+    if (typeof loadSettings === 'function') {
+      loadSettings();
+    }
+    if (typeof _renderRestoredTrades === 'function') {
+      _renderRestoredTrades();
+    }
+  }
+
   // ── Bootstrap — wait for body to exist ──────────────────────────────
   function _init() {
     _injectStyles();
@@ -259,12 +264,7 @@
       _setLoggedInUI(storedUser, wasRemembered);
       
       // ── LOAD AND RENDER TRADES ON PAGE LOAD ──────────────────────────
-      if (typeof loadSettings === 'function') {
-        loadSettings();
-      }
-      if (typeof _renderRestoredTrades === 'function') {
-        _renderRestoredTrades();
-      }
+      _loadUserData();
       // ────────────────────────────────────────────────────────────────
       
     } else {
